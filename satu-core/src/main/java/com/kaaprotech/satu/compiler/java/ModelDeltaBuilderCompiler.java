@@ -60,7 +60,7 @@ public final class ModelDeltaBuilderCompiler extends AbstractModelCompiler {
 
     public void compileDeltaBuilderClassStart() {
         out();
-        out(2,"public static final class Builder extends AbstractDeltaBuilder<" + dt_.getName() + ".Delta> implements ModelDeltaBuilder<" + getKeyFieldType() + ", " +
+        out(2, "public static final class Builder extends AbstractDeltaBuilder<" + dt_.getName() + ".Delta> implements ModelDeltaBuilder<" + getKeyFieldType() + ", " +
                 dt_.getName() + ".Delta>, Comparable<" + dt_.getName() + ".Delta.Builder> {");
     }
 
@@ -240,7 +240,7 @@ public final class ModelDeltaBuilderCompiler extends AbstractModelCompiler {
                 case Primitive:
                 case ImportedType:
                     out();
-                    out(3, "public Delta.Builder " + methodNameForSetter(field) + "(" + getDeltaBuilderFieldType(field) + " " + field.getName() + ") {");
+                    out(3, "public Delta.Builder " + methodNameForSetter(field) + "(final " + getDeltaBuilderFieldType(field) + " " + field.getName() + ") {");
                     out(4, "initForUpdate(" + DBF + "." + field.getName() + ");");
                     out(4, field.getName() + "_ = " + field.getName() + ";");
                     out(4, "return this;");

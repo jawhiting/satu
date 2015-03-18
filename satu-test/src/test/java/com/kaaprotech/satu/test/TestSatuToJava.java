@@ -55,7 +55,8 @@ public class TestSatuToJava {
             1,
             1L,
             true, 'a',
-            (byte) 0, 1.1f,
+            (byte) 0,
+            1.1f,
             Sets.immutable.of(SatuTestEnum.SecondEnumMember, SatuTestEnum.FirstEnumMember),
             Maps.immutable.of("Key2", 2.2d, "Key1", 1.1d),
             Sets.immutable.of(2, 1),
@@ -141,7 +142,7 @@ public class TestSatuToJava {
     public void testModelWithNullModleField() {
         final SatuTestModel base1 = SatuTestModel.newBuilder(1).build();
         final SatuTestModel modelField = SatuTestModel.newBuilder(2).build();
-        final SatuTestModel base2 = base1.toBuilder().setModelField(modelField.toBuilder()).build();
+        final SatuTestModel base2 = base1.toBuilder().setModelField(modelField).build();
         assertNotNull(base2.getModelField());
         assertEquals(base2.getModelField(), modelField);
     }

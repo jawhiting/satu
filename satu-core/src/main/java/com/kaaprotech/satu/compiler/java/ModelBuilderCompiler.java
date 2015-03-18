@@ -330,11 +330,21 @@ public final class ModelBuilderCompiler extends AbstractModelCompiler {
                 case Primitive:
                 case ImportedType:
                     out();
-                    out(2, "public " + dt_.getName() + ".Builder " + methodNameForSetter(field) + "(" + getBuilderFieldType(field) + " " + field.getName() + ") {");
+                    out(2, "public " + dt_.getName() + ".Builder " + methodNameForSetter(field) + "(final " + getBuilderFieldType(field) + " " + field.getName() + ") {");
                     out(3, "initForUpdate(" + BF + "." + field.getName() + ");");
                     out(3, field.getName() + "_ = " + field.getName() + ";");
                     out(3, "return this;");
                     out(2, "}");
+
+                    if (field.getFieldTypeCategory() == FieldTypeCategory.DeclaredType && isTypeMutable(field.getTypeName())) {
+                        out();
+                        out(2, "public " + dt_.getName() + ".Builder " + methodNameForSetter(field) + "(final " + getFieldType(field) + " " + field.getName() + ") {");
+                        out(3, "initForUpdate(" + BF + "." + field.getName() + ");");
+                        out(3, field.getName() + "_ = " + field.getName() + ".toBuilder();");
+                        out(3, "return this;");
+                        out(2, "}");
+                    }
+
                     break;
                 }
 
@@ -360,12 +370,24 @@ public final class ModelBuilderCompiler extends AbstractModelCompiler {
                     out(3, methodNameForGetter(field) + "().put(key, builder);");
                     out(3, "return this;");
                     out(2, "}");
+
+                    out();
+                    out(2, "public " + dt_.getName() + ".Builder " + methodNameForPut(field) + "(final " + javaTypeName(field.getTypeArgs().get(0)) + " key, final " + field.getTypeArgs().get(1) + " model) {");
+                    out(3, methodNameForGetter(field) + "().put(key, model.toBuilder());");
+                    out(3, "return this;");
+                    out(2, "}");
                 }
 
                 if (isMapKeySameAsMutableValueTypeKey(field)) {
                     out();
                     out(2, "public " + dt_.getName() + ".Builder " + methodNameForAddOrReplace(field) + "(final " + field.getTypeArgs().get(1) + ".Builder builder) {");
                     out(3, methodNameForGetter(field) + "().put(builder.getKey(), builder);");
+                    out(3, "return this;");
+                    out(2, "}");
+
+                    out();
+                    out(2, "public " + dt_.getName() + ".Builder " + methodNameForAddOrReplace(field) + "(final " + field.getTypeArgs().get(1) + " model) {");
+                    out(3, methodNameForGetter(field) + "().put(model.getKey(), model.toBuilder());");
                     out(3, "return this;");
                     out(2, "}");
                 }
@@ -606,7 +628,8 @@ public final class ModelBuilderCompiler extends AbstractModelCompiler {
                         out(4, "});");
                         out(3, "}");
                         out(3, "else {");
-                        out(4, "SatuUtil.reconcileModelField(ref." + methodNameForGetter(field) + "(), " + REF + "." + methodNameForGetter(field) + "(), deltaBuilder." + methodNameForGetter(field) + "(),");
+                        out(4,
+                                "SatuUtil.reconcileModelField(ref." + methodNameForGetter(field) + "(), " + REF + "." + methodNameForGetter(field) + "(), deltaBuilder." + methodNameForGetter(field) + "(),");
                         out(6, "new DeltaBuilderSetter<" + field.getTypeName() + ".Delta.Builder>() {");
                         out(7, "@Override");
                         out(7, "public void set(final " + field.getTypeName() + ".Delta.Builder db) {");
@@ -617,7 +640,8 @@ public final class ModelBuilderCompiler extends AbstractModelCompiler {
                         break;
 
                     case Set:
-                        out(3, "SatuUtil.reconcileKeys(ref." + methodNameForGetter(field) + "(), updated(" + BF + "." + field.getName() + ") ? " + field.getName() + "_ : " + REF + "." + methodNameForGetter(field) + "(),");
+                        out(3,
+                                "SatuUtil.reconcileKeys(ref." + methodNameForGetter(field) + "(), updated(" + BF + "." + field.getName() + ") ? " + field.getName() + "_ : " + REF + "." + methodNameForGetter(field) + "(),");
                         out(5, " new DeltaAppender<KeyDelta<" + javaTypeName(field.getTypeArgs().getFirst()) + ">>() {");
                         out(6, "@Override");
                         out(6, "public void append(final " + paramTypeForDeltaBuilderAddMethod(field) + " newDelta) {");
@@ -648,7 +672,8 @@ public final class ModelBuilderCompiler extends AbstractModelCompiler {
                             out(3, "}");
                         }
                         else {
-                            out(3, "SatuUtil.reconcileKeyValuePairs(ref." + methodNameForGetter(field) + "(), updated(" + BF + "." + field.getName() + ") ? " + field.getName() + "_ : " + REF + "." + methodNameForGetter(field) + "(),");
+                            out(3,
+                                    "SatuUtil.reconcileKeyValuePairs(ref." + methodNameForGetter(field) + "(), updated(" + BF + "." + field.getName() + ") ? " + field.getName() + "_ : " + REF + "." + methodNameForGetter(field) + "(),");
                             out(5, "new DeltaAppender<" + paramTypeForDeltaBuilderAddMethod(field) + ">() {");
                             out(6, "@Override");
                             out(6, "public void append(final " + paramTypeForDeltaBuilderAddMethod(field) + " newDelta) {");
